@@ -129,14 +129,14 @@ export async function GET(req: NextRequest) {
   }
 
   const buffer = await renderToBuffer(
-    React.createElement(StoryDocument, {
+    StoryDocument({
       childName: story.childName,
       theme: story.theme,
       content: story.content,
-    })
+    }) as React.ReactElement<any>
   );
 
-  return new Response(buffer, {
+  return new Response(new Uint8Array(buffer), {
     headers: {
       "Content-Type": "application/pdf",
       "Content-Disposition": `attachment; filename="kazka.pdf"; filename*=UTF-8''${encodeURIComponent(`kazka-${story.childName}`)}.pdf`,
