@@ -7,6 +7,7 @@ import { sendMagicLinkEmail } from "@/lib/resend";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
+  session: { strategy: "jwt" },
   providers: [
     Google({
       clientId: process.env.AUTH_GOOGLE_ID!,
@@ -21,14 +22,21 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
-    async session({ session, user }) {
-      if (session.user) {
-        session.user.id = user.id;
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
         const dbUser = await prisma.user.findUnique({
-          where: { id: user.id },
+          where: { id: user.id! },
           select: { plan: true },
         });
-        session.user.plan = dbUser?.plan ?? "FREE";
+        token.plan = (dbUser?.plan as "FREE" | "PREMIUM") ?? "FREE";
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (session.user) {
+        session.user.id = token.id!;
+        session.user.plan = token.plan ?? "FREE";
       }
       return session;
     },
