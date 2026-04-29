@@ -1,0 +1,81 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * { @apply border-border; }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  ::selection {
+    background: #FFBE0B;
+    color: #1E1044;
+  }
+}
+
+@layer utilities {
+  .font-heading {
+    font-family: var(--font-nunito), sans-serif;
+  }
+
+  .font-story {
+    font-family: var(--font-cormorant), Georgia, serif;
+  }
+
+  .story-prose {
+    font-family: var(--font-lora), serif;
+    line-height: 2;
+    font-size: 1.05rem;
+    color: #2D1B69;
+  }
+
+  /* Shimmer */
+  .shimmer {
+    position: relative;
+    overflow: hidden;
+    background: #EDE9FE;
+  }
+  .shimmer::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.6) 50%, transparent 100%);
+    transform: translateX(-100%);
+    animation: shimmer 1.5s infinite;
+  }
+
+  /* Book page blur preview */
+  .blur-preview {
+    position: relative;
+  }
+  .blur-preview::after {
+    content: "";
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 50%;
+    background: linear-gradient(to bottom, transparent, #FFFEF5 90%);
+    pointer-events: none;
+  }
+
+  /* Wavy bottom border for sections */
+  .wave-bottom {
+    position: relative;
+  }
+  .wave-bottom::after {
+    content: "";
+    position: absolute;
+    bottom: -1px; left: 0; right: 0;
+    height: 48px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 48'%3E%3Cpath fill='%23FFFEF5' d='M0,32 C360,0 1080,64 1440,32 L1440,48 L0,48 Z'/%3E%3C/svg%3E") no-repeat bottom;
+    background-size: cover;
+  }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: #F4F0FF; }
+::-webkit-scrollbar-thumb { background: #C4B5FD; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #4F3AE8; }
