@@ -1,0 +1,40 @@
+<svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgFav" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#6B5FD4"/>
+      <stop offset="100%" stop-color="#3A2D9E"/>
+    </linearGradient>
+    <radialGradient id="moonHaloFav" cx="62" cy="35" r="38" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFD700" stop-opacity="0.28"/>
+      <stop offset="100%" stop-color="#FFD700" stop-opacity="0"/>
+    </radialGradient>
+    <mask id="moonMaskFav">
+      <circle cx="62" cy="35" r="26" fill="white"/>
+      <circle cx="76" cy="28" r="22" fill="black"/>
+    </mask>
+  </defs>
+
+  <!-- Background -->
+  <rect width="100" height="100" rx="22" fill="url(#bgFav)"/>
+
+  <!-- Star dots -->
+  <circle cx="20" cy="22" r="1.5" fill="white" opacity="0.65"/>
+  <circle cx="32" cy="14" r="1" fill="white" opacity="0.5"/>
+  <circle cx="15" cy="52" r="1" fill="white" opacity="0.4"/>
+  <circle cx="72" cy="70" r="1.5" fill="white" opacity="0.5"/>
+  <circle cx="84" cy="78" r="1" fill="white" opacity="0.4"/>
+  <circle cx="28" cy="80" r="1" fill="white" opacity="0.35"/>
+
+  <!-- Gold sparkle — left of moon -->
+  <path d="M22,33 L22.75,37.25 L27,38 L22.75,38.75 L22,43 L21.25,38.75 L17,38 L21.25,37.25 Z" fill="#FFD700" opacity="0.9"/>
+
+  <!-- Small lavender sparkle — bottom right -->
+  <path d="M78,61 L78.6,64.4 L82,65 L78.6,65.6 L78,69 L77.4,65.6 L74,65 L77.4,64.4 Z" fill="#C4B5FD" opacity="0.85"/>
+
+  <!-- Moon halo -->
+  <circle cx="62" cy="35" r="38" fill="url(#moonHaloFav)"/>
+
+  <!-- Crescent moon -->
+  <circle cx="62" cy="35" r="26" fill="#FFD700" mask="url(#moonMaskFav)"/>
+  <circle cx="62" cy="35" r="27" fill="none" stroke="#FFD700" stroke-width="1" opacity="0.25" mask="url(#moonMaskFav)"/>
+</svg>
