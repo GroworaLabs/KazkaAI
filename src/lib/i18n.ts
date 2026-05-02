@@ -151,6 +151,33 @@ export interface Translations {
     message: string;
     backHome: string;
   };
+  auth: {
+    signInTitle: string;
+    signInSub: string;
+    continueGoogle: string;
+    orViaEmail: string;
+    emailButton: string;
+    checkMailTitle: string;
+    checkMailPrefix: string;
+    checkMailSuffix: string;
+    termsPrefix: string;
+    termsLink: string;
+    termsAnd: string;
+    privacyLink: string;
+    verifyTitle: string;
+    verifyDesc: string;
+  };
+  error: {
+    title: string;
+    message: string;
+    tryAgain: string;
+  };
+  sharedStory: {
+    ctaLabel: string;
+    ctaButton: string;
+    ageLabel: (n: number) => string;
+    pageNum: string;
+  };
   comingSoon: string;
 }
 
@@ -334,6 +361,33 @@ export const translations: Record<Locale, Translations> = {
       message: "Looks like this page got lost in the enchanted forest.",
       backHome: "Back to home",
     },
+    auth: {
+      signInTitle: "Sign In to KazkaAI",
+      signInSub: "Sign up or sign in to save stories",
+      continueGoogle: "Continue with Google",
+      orViaEmail: "or via email",
+      emailButton: "Get login link",
+      checkMailTitle: "Check your email",
+      checkMailPrefix: "We sent a login link to",
+      checkMailSuffix: "Check your spam folder if you can't find it.",
+      termsPrefix: "By registering, you agree to the",
+      termsLink: "terms of service",
+      termsAnd: "and",
+      privacyLink: "privacy policy",
+      verifyTitle: "Check your email",
+      verifyDesc: "We sent you a login link. Click it to sign in to KazkaAI. Check your spam folder if you can't find the email.",
+    },
+    error: {
+      title: "Something went wrong",
+      message: "Please try again.",
+      tryAgain: "Try Again",
+    },
+    sharedStory: {
+      ctaLabel: "Want a personalised story for your child?",
+      ctaButton: "Create for free",
+      ageLabel: (n) => `${n} y.o.`,
+      pageNum: "p. 1",
+    },
     comingSoon: "Coming soon",
   },
 
@@ -515,6 +569,33 @@ export const translations: Record<Locale, Translations> = {
       title: "Сторінку не знайдено",
       message: "Схоже, ця сторінка загубилась у чарівному лісі.",
       backHome: "На головну",
+    },
+    auth: {
+      signInTitle: "Увійти до КазкоAI",
+      signInSub: "Зареєструйтесь або увійдіть, щоб зберігати казки",
+      continueGoogle: "Продовжити через Google",
+      orViaEmail: "або через email",
+      emailButton: "Отримати посилання для входу",
+      checkMailTitle: "Перевірте пошту",
+      checkMailPrefix: "Ми надіслали вам посилання для входу на",
+      checkMailSuffix: "Перевірте папку «Спам» якщо не знайдете.",
+      termsPrefix: "Реєструючись, ви погоджуєтесь з",
+      termsLink: "умовами використання",
+      termsAnd: "та",
+      privacyLink: "політикою конфіденційності",
+      verifyTitle: "Перевірте вашу пошту",
+      verifyDesc: "Ми надіслали вам посилання для входу. Натисніть на нього, щоб увійти до КазкоAI. Перевірте папку «Спам» якщо не знайдете листа.",
+    },
+    error: {
+      title: "Щось пішло не так",
+      message: "Спробуйте ще раз.",
+      tryAgain: "Спробувати знову",
+    },
+    sharedStory: {
+      ctaLabel: "Хочете таку саму казку для своєї дитини?",
+      ctaButton: "Створити безкоштовно",
+      ageLabel: (n) => `${n} р.`,
+      pageNum: "стор. 1",
     },
     comingSoon: "Скоро",
   },

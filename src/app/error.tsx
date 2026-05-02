@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { useLocale } from "@/contexts/LocaleContext";
 
 export default function ErrorPage({
   error,
@@ -10,6 +11,8 @@ export default function ErrorPage({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const { t } = useLocale();
+
   useEffect(() => {
     console.error(error);
   }, [error]);
@@ -23,11 +26,11 @@ export default function ErrorPage({
           <line x1="12" y1="16" x2="12.01" y2="16"/>
         </svg>
       </div>
-      <h2 className="font-heading font-900 text-2xl text-foreground mb-3">Щось пішло не так</h2>
-      <p className="text-muted-foreground mb-8">Спробуйте ще раз.</p>
+      <h2 className="font-heading font-900 text-2xl text-foreground mb-3">{t.error.title}</h2>
+      <p className="text-muted-foreground mb-8">{t.error.message}</p>
       <Button onClick={reset}
         className="rounded-2xl bg-primary hover:bg-primary-dark text-white font-heading font-800 px-6 h-11">
-        Спробувати знову
+        {t.error.tryAgain}
       </Button>
     </div>
   );

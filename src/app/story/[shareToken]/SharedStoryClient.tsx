@@ -48,15 +48,11 @@ export function SharedStoryClient({ story }: { story: StoryData }) {
     window.open(`/api/pdf?token=${story.shareToken}`, "_blank");
   };
 
-  const storyTitle = locale === "uk"
-    ? `Казка для ${story.childName}`
-    : `A Story for ${story.childName}`;
-  const backLabel = locale === "uk" ? "На головну" : "Home";
-  const ctaLabel = locale === "uk"
-    ? "Хочете таку саму казку для своєї дитини?"
-    : "Want a personalised story for your child?";
-  const ctaButton = locale === "uk" ? "Створити безкоштовно" : "Create for free";
-  const ageLabel = locale === "uk" ? `${story.childAge} р.` : `${story.childAge} y.o.`;
+  const storyTitle = t.display.storyFor(story.childName);
+  const backLabel = t.notFound.backHome;
+  const ctaLabel = t.sharedStory.ctaLabel;
+  const ctaButton = t.sharedStory.ctaButton;
+  const ageLabel = t.sharedStory.ageLabel(story.childAge);
 
   return (
     <div className="min-h-screen bg-background">
@@ -94,7 +90,7 @@ export function SharedStoryClient({ story }: { story: StoryData }) {
                 ))}
               </div>
               <span className="font-heading font-800 text-white/70 text-xs">{t.brandName}</span>
-              <span className="font-heading font-700 text-white/40 text-xs">{locale === "uk" ? "стор. 1" : "p. 1"}</span>
+              <span className="font-heading font-700 text-white/40 text-xs">{t.sharedStory.pageNum}</span>
             </div>
 
             <div className="p-7 sm:p-10">

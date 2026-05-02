@@ -1,4 +1,10 @@
+"use client";
+
+import { useLocale } from "@/contexts/LocaleContext";
+
 export default function VerifyPage() {
+  const { t } = useLocale();
+
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4 bg-background">
       <div className="text-center max-w-sm">
@@ -7,10 +13,9 @@ export default function VerifyPage() {
             <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
           </svg>
         </div>
-        <h1 className="font-heading font-900 text-2xl text-foreground mb-2">Перевірте вашу пошту</h1>
+        <h1 className="font-heading font-900 text-2xl text-foreground mb-2">{t.auth.verifyTitle}</h1>
         <p className="text-muted-foreground text-sm leading-relaxed">
-          Ми надіслали вам посилання для входу. Натисніть на нього, щоб
-          увійти до КазкоAI. Перевірте папку &ldquo;Спам&rdquo; якщо не знайдете листа.
+          {t.auth.verifyDesc}
         </p>
       </div>
     </div>
