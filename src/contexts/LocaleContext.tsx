@@ -16,12 +16,16 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const stored = localStorage.getItem("locale") as Locale | null;
-    if (stored === "en" || stored === "uk") setLocaleState(stored);
+    if (stored === "en" || stored === "uk") {
+      setLocaleState(stored);
+      document.cookie = `kazka_locale=${stored}; path=/; max-age=31536000; SameSite=Lax`;
+    }
   }, []);
 
   const setLocale = (l: Locale) => {
     setLocaleState(l);
     localStorage.setItem("locale", l);
+    document.cookie = `kazka_locale=${l}; path=/; max-age=31536000; SameSite=Lax`;
   };
 
   return (

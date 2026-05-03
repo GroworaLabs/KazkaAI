@@ -2,10 +2,12 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { DashboardClient } from "./DashboardClient";
+import { getLocaleFromCookie, pageMeta } from "@/lib/meta";
 
-export const metadata = {
-  title: "Мої казки",
-};
+export async function generateMetadata() {
+  const m = pageMeta[getLocaleFromCookie()].dashboard;
+  return { title: m.title, description: m.description };
+}
 
 export default async function DashboardPage({
   searchParams,

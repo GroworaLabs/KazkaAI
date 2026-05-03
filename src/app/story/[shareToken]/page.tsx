@@ -4,6 +4,7 @@ import { formatDate } from "@/lib/utils";
 import { THEMES } from "@/types";
 import type { Metadata } from "next";
 import { SharedStoryClient } from "./SharedStoryClient";
+import { getLocaleFromCookie, pageMeta } from "@/lib/meta";
 
 interface Props {
   params: { shareToken: string };
@@ -15,14 +16,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     select: { childName: true, theme: true },
   });
 
-  if (!story) return { title: "Казку не знайдено" };
+  const locale = getLocaleFromCookie();
+  const m = pageMeta[locale].sharedStory;
+  const themeObj = THEMES.find((t) => t.id === story?.theme);
+  const themeLabel = locale === "uk"
+    ? (themeObj?.label ?? story?.theme ?? "")
+    : (themeObj?.labelEn ?? story?.theme ?? "");
 
-  const themeLabel =
-    THEMES.find((t) => t.id === story.theme)?.label ?? story.theme;
+  if (!story) return { title: m.notFound };
 
   return {
-    title: `Казка для ${story.childName} про ${themeLabel}`,
-    description: `Персональна казка для ${story.childName} — створена на КазкоAI`,
+    title: m.title(story.childName, themeLabel),
+    description: m.description(story.childName),
   };
 }
 

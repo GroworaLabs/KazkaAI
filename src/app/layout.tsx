@@ -5,6 +5,7 @@ import { Providers } from "@/components/Providers";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { auth } from "@/lib/auth";
+import { getLocaleFromCookie, pageMeta } from "@/lib/meta";
 
 const inter = Inter({
   subsets: ["latin", "cyrillic"],
@@ -32,44 +33,37 @@ const nunito = Nunito({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  title: {
-    default: "КазкоAI — Персональні казки для дітей",
-    template: "%s | КазкоAI",
-  },
-  description:
-    "Створіть унікальну казку, де ваша дитина — головний герой. Персональні казки українською мовою за 10 секунд за допомогою штучного інтелекту.",
-  keywords: [
-    "казки для дітей",
-    "персональні казки",
-    "ШІ казки",
-    "казки українською",
-    "казкоAI",
-  ],
-  authors: [{ name: "КазкоAI" }],
-  openGraph: {
-    type: "website",
-    locale: "uk_UA",
-    url: process.env.NEXT_PUBLIC_APP_URL,
-    siteName: "КазкоAI",
-    title: "КазкоAI — Персональні казки для дітей",
-    description:
-      "Створіть унікальну казку, де ваша дитина — головний герой. За 10 секунд.",
-    images: [{ url: "/og-image.svg", width: 1200, height: 630 }],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "КазкоAI — Персональні казки для дітей",
-    description: "Унікальні казки українською мовою, де ваша дитина — герой.",
-    images: ["/og-image.svg"],
-  },
-  icons: {
-    icon: "/favicon.svg",
-  },
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
-  ),
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = getLocaleFromCookie();
+  const m = pageMeta[locale];
+
+  return {
+    title: {
+      default: m.home.title,
+      template: m.titleTemplate,
+    },
+    description: m.home.description,
+    keywords: m.home.keywords,
+    authors: [{ name: m.siteName }],
+    openGraph: {
+      type: "website",
+      locale: m.ogLocale,
+      url: process.env.NEXT_PUBLIC_APP_URL,
+      siteName: m.siteName,
+      title: m.home.title,
+      description: m.home.description,
+      images: [{ url: "/og-image.svg", width: 1200, height: 630 }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: m.home.title,
+      description: m.home.description,
+      images: ["/og-image.svg"],
+    },
+    icons: { icon: "/favicon.svg" },
+    metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"),
+  };
+}
 
 export default async function RootLayout({
   children,
@@ -77,9 +71,10 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const session = await auth();
+  const locale = getLocaleFromCookie();
 
   return (
-    <html lang="uk" className={`${inter.variable} ${lora.variable} ${cormorant.variable} ${nunito.variable}`}>
+    <html lang={locale} className={`${inter.variable} ${lora.variable} ${cormorant.variable} ${nunito.variable}`}>
       <body className="font-sans antialiased min-h-screen flex flex-col">
         <Providers session={session}>
           <Navbar />
