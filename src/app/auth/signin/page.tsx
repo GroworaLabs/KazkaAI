@@ -13,12 +13,13 @@ export default function SignInPage() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
 
   const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
     setLoading(true);
+    document.cookie = `kazka_locale=${locale}; path=/; max-age=3600`;
     await signIn("resend", { email, redirect: false });
     setSent(true);
     setLoading(false);

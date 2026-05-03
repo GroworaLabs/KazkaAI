@@ -16,8 +16,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     Resend({
       apiKey: process.env.RESEND_API_KEY!,
       from: process.env.RESEND_FROM_EMAIL ?? "КазкоAI <hello@kazka.ai>",
-      async sendVerificationRequest({ identifier: email, url }) {
-        await sendMagicLinkEmail(email, url);
+      async sendVerificationRequest({ identifier: email, url, request }) {
+        const cookieHeader = request?.headers?.get("cookie") ?? "";
+        const match = cookieHeader.match(/kazka_locale=([^;]+)/);
+        const locale = match?.[1] === "uk" ? "uk" : "en";
+        await sendMagicLinkEmail(email, url, locale);
       },
     }),
   ],
