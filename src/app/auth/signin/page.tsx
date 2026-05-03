@@ -1,7 +1,8 @@
 "use client";
 
-import { signIn } from "next-auth/react";
-import { useState } from "react";
+import { signIn, useSession } from "next-auth/react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,13 +15,21 @@ export default function SignInPage() {
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
   const { t, locale } = useLocale();
+  const { status } = useSession();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (status === "authenticated") {
+      router.replace("/dashboard");
+    }
+  }, [status, router]);
 
   const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
     setLoading(true);
     document.cookie = `kazka_locale=${locale}; path=/; max-age=3600`;
-    await signIn("resend", { email, redirect: false });
+    await signIn("resend", { email, redirect: false, callbackUrl: "/dashboard" });
     setSent(true);
     setLoading(false);
   };
@@ -64,7 +73,7 @@ export default function SignInPage() {
               <Button
                 className="w-full gap-2.5 rounded-2xl border-2 border-border bg-white hover:bg-muted text-foreground font-heading font-800 h-12 shadow-sm"
                 variant="outline"
-                onClick={() => signIn("google", { callbackUrl: "/" })}
+                onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
               >
                 <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
