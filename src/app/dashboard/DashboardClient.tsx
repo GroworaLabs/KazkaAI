@@ -38,7 +38,7 @@ export function DashboardClient({ stories, total, page, limit, user, upgraded }:
   const { t } = useLocale();
   const d = t.dashboard;
   const totalPages = Math.ceil(total / limit);
-  const isPremium = user?.plan === "PREMIUM";
+  const isPremium = user !== null; // all logged-in users get premium until payments are enabled
 
   useEffect(() => {
     if (upgraded) {
@@ -73,7 +73,7 @@ export function DashboardClient({ stories, total, page, limit, user, upgraded }:
                 )}
               </div>
               <p className="text-xs text-white/40 font-heading font-700">
-                {d.storiesUsed(user?.storiesUsedToday ?? 0, PLAN_LIMITS[user?.plan ?? "FREE"].daily)}
+                {d.storiesUsed(user?.storiesUsedToday ?? 0, PLAN_LIMITS.PREMIUM.daily)}
               </p>
             </div>
           </div>

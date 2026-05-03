@@ -557,7 +557,11 @@ export const translations: Record<Locale, Translations> = {
       title: "Мої казки",
       account: "Ваш акаунт",
       noStories: "Поки казок немає — створіть першу!",
-      storiesCount: (n) => `${n} казк${n === 1 ? "а" : n <= 4 ? "и" : ""} збережено`,
+      storiesCount: (n) => {
+        const m10 = n % 10, m100 = n % 100;
+        const s = m10 === 1 && m100 !== 11 ? "а" : m10 >= 2 && m10 <= 4 && (m100 < 10 || m100 >= 20) ? "и" : "ок";
+        return `${n} казк${s} збережено`;
+      },
       premium: "Преміум",
       free: "Безкоштовно",
       storiesUsed: (n, max) => `${n}/${max} казок сьогодні`,
