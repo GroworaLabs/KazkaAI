@@ -1,12 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { GenerationStatus } from "@/types";
 import { buildShareText, getShareUrl } from "@/lib/utils";
-import { Copy, Download, Share2, RefreshCw, CheckCheck, Loader2, ArrowRight, BookOpen, Star, FileDown } from "lucide-react";
+import { Copy, Download, Share2, RefreshCw, CheckCheck, Loader2, ArrowRight, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLocale } from "@/contexts/LocaleContext";
 
@@ -107,92 +106,45 @@ export function StoryDisplay({
             <p className="text-muted-foreground text-sm">{d.cooldownAutoReady}</p>
           </div>
         ) : error === "guest_limit" ? (
-          <div className="p-6 sm:p-8">
-            <div className="text-center mb-6">
+          <div className="p-6 sm:p-8 space-y-5">
+            <div className="text-center">
+              <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-3">
+                <BookOpen size={22} className="text-primary" />
+              </div>
               <h3 className="font-heading font-900 text-2xl text-foreground">{d.limitTitle}</h3>
-              <p className="text-muted-foreground text-sm mt-1">{d.limitOptionsTitle}</p>
+              <p className="text-muted-foreground text-sm mt-1">{d.limitRegisterTitle}</p>
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              {/* Free option */}
-              <div className="rounded-2xl border-2 border-border p-4 flex flex-col gap-2">
-                <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <BookOpen size={15} className="text-primary" />
-                </div>
-                <p className="font-heading font-800 text-sm">{d.limitFreeOption}</p>
-                <p className="text-xs text-muted-foreground">{d.limitFreeOptionDesc}</p>
-                <Button onClick={onRegisterPrompt} size="sm"
-                  className="mt-auto bg-primary hover:bg-primary-dark text-white rounded-full font-heading font-800 gap-1 text-xs h-8">
-                  {d.register} <ArrowRight size={11} />
-                </Button>
-              </div>
-              {/* Premium option */}
-              <div className="rounded-2xl border-2 border-sun/50 bg-sun/5 p-4 flex flex-col gap-2">
-                <div className="w-8 h-8 rounded-xl bg-sun/20 flex items-center justify-center">
-                  <Star size={15} className="text-[#9B6700]" fill="currentColor" />
-                </div>
-                <p className="font-heading font-800 text-sm">{d.limitPremiumOption}</p>
-                <p className="text-xs text-muted-foreground">{d.limitPremiumOptionDesc}</p>
-                <div className="inline-flex items-center gap-1 text-xs font-heading font-700 text-[#9B6700]">
-                  <FileDown size={11} /> {d.limitPdfBadge}
-                </div>
-                <Link href="/pricing" className="mt-auto">
-                  <Button size="sm"
-                    className="w-full bg-sun hover:bg-sun/80 text-[#1E1044] rounded-full font-heading font-800 gap-1 text-xs h-8">
-                    {d.limitPremiumCta} <ArrowRight size={11} />
-                  </Button>
-                </Link>
-              </div>
+            <ul className="space-y-2">
+              {d.limitRegisterBenefits.map((b) => (
+                <li key={b} className="flex items-center gap-2.5 text-sm text-foreground/75">
+                  <span className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                    <svg width="9" height="7" viewBox="0 0 9 7" fill="none">
+                      <path d="M1 3.5l2.5 2.5 5-5" stroke="#6C48FF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </span>
+                  {b}
+                </li>
+              ))}
+            </ul>
+            <div className="flex gap-2">
+              <Button onClick={onRegisterPrompt} size="sm"
+                className="flex-1 bg-primary hover:bg-primary-dark text-white rounded-full font-heading font-800 gap-1.5">
+                {d.register} <ArrowRight size={13} />
+              </Button>
+              <Button variant="outline" size="sm" onClick={onReset}
+                className="rounded-full border-2 font-heading font-800 text-muted-foreground">
+                {d.limitMaybeLater}
+              </Button>
             </div>
           </div>
         ) : error === "limit_reached" ? (
-          <div className="p-6 sm:p-8">
-            <div className="text-center mb-5">
-              <h3 className="font-heading font-900 text-2xl text-foreground">{d.limitTitle}</h3>
-            </div>
-            {isPremium ? (
-              /* PREMIUM hit 30/day — simple message */
-              <div className="text-center space-y-4">
-                <p className="text-muted-foreground text-sm">{d.limitUserMsg}</p>
-                <Button onClick={onReset} variant="outline" size="sm"
-                  className="rounded-full border-2 font-heading font-800">
-                  {d.limitBackTomorrow}
-                </Button>
-              </div>
-            ) : (
-              /* FREE user — show upgrade card */
-              <div className="rounded-2xl border-2 border-sun/50 bg-sun/5 p-5 space-y-3">
-                <div className="flex items-center gap-2">
-                  <Star size={16} className="text-[#9B6700]" fill="currentColor" />
-                  <p className="font-heading font-800 text-base">{d.limitPremiumOption} — $3.99/{locale === "uk" ? "місяць" : "month"}</p>
-                </div>
-                <ul className="space-y-1.5">
-                  {[d.limitPremiumOptionDesc, d.limitPdfBadge].map((feat) => (
-                    <li key={feat} className="flex items-center gap-2 text-sm text-foreground/70">
-                      <span className="w-4 h-4 rounded-full bg-sun/30 flex items-center justify-center shrink-0">
-                        <svg width="8" height="6" viewBox="0 0 8 6" fill="none">
-                          <path d="M1 3l2 2 4-4" stroke="#9B6700" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      </span>
-                      {feat === d.limitPdfBadge
-                        ? <span className="flex items-center gap-1"><FileDown size={12} className="text-[#9B6700]" />{feat}</span>
-                        : feat}
-                    </li>
-                  ))}
-                </ul>
-                <div className="flex gap-2 pt-1">
-                  <Link href="/pricing" className="flex-1">
-                    <Button size="sm"
-                      className="w-full bg-sun hover:bg-sun/80 text-[#1E1044] rounded-full font-heading font-800 gap-1.5">
-                      {d.limitPremiumCta} <ArrowRight size={13} />
-                    </Button>
-                  </Link>
-                  <Button variant="outline" size="sm" onClick={onReset}
-                    className="rounded-full border-2 font-heading font-800 text-muted-foreground">
-                    {d.limitBackTomorrow}
-                  </Button>
-                </div>
-              </div>
-            )}
+          <div className="p-8 text-center space-y-4">
+            <h3 className="font-heading font-900 text-2xl text-foreground">{d.limitTitle}</h3>
+            <p className="text-muted-foreground text-sm">{d.limitUserMsg}</p>
+            <Button onClick={onReset} variant="outline" size="sm"
+              className="rounded-full border-2 font-heading font-800">
+              {d.limitBackTomorrow}
+            </Button>
           </div>
         ) : (
           <div className="p-8 text-center space-y-4">
@@ -289,15 +241,6 @@ export function StoryDisplay({
                   className="gap-1.5 text-xs rounded-full border-2 border-sun/40 text-[#9B6700] font-heading font-800 hover:bg-sun/10 hover:border-sun">
                   <Download size={12} /> {d.downloadPdf}
                 </Button>
-              )}
-
-              {result?.shareToken && !isPremium && isLoggedIn && (
-                <Link href="/pricing">
-                  <Button variant="outline" size="sm"
-                    className="gap-1.5 text-xs rounded-full border-2 border-sun/40 text-[#9B6700] font-heading font-800 hover:bg-sun/10 hover:border-sun">
-                    <FileDown size={12} /> {d.pdfPremium}
-                  </Button>
-                </Link>
               )}
 
               <Button variant="ghost" size="sm" onClick={onReset}

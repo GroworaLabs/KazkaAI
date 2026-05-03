@@ -55,13 +55,9 @@ export interface Translations {
     limitCooldownMsg: (seconds: number) => string;
     cooldownLabel: string;
     cooldownAutoReady: string;
-    limitOptionsTitle: string;
-    limitFreeOption: string;
-    limitFreeOptionDesc: string;
-    limitPremiumOption: string;
-    limitPremiumOptionDesc: string;
-    limitPdfBadge: string;
-    limitPremiumCta: string;
+    limitRegisterTitle: string;
+    limitRegisterBenefits: string[];
+    limitMaybeLater: string;
     limitBackTomorrow: string;
     register: string;
     guestSaveCta: string;
@@ -248,13 +244,9 @@ export const translations: Record<Locale, Translations> = {
       limitCooldownMsg: (s) => `Please wait ${s} second${s === 1 ? "" : "s"} before creating another story.`,
       cooldownLabel: "Wait a moment",
       cooldownAutoReady: "The form will be ready automatically",
-      limitOptionsTitle: "Want more stories?",
-      limitFreeOption: "Free account",
-      limitFreeOptionDesc: "5 stories per day",
-      limitPremiumOption: "Premium",
-      limitPremiumOptionDesc: "30 stories per day",
-      limitPdfBadge: "PDF download",
-      limitPremiumCta: "Try Premium",
+      limitRegisterTitle: "Create a free account for full access",
+      limitRegisterBenefits: ["30 stories per day", "Download any story as PDF", "Customise length, mood & occasion"],
+      limitMaybeLater: "Maybe later",
       limitBackTomorrow: "Come back tomorrow",
       register: "Sign Up",
       guestSaveCta: "Sign up — it's free",
@@ -468,13 +460,9 @@ export const translations: Record<Locale, Translations> = {
       limitCooldownMsg: (s) => `Зачекайте ${s} ${s === 1 ? "секунду" : s <= 4 ? "секунди" : "секунд"} перед наступною казкою.`,
       cooldownLabel: "Почекайте",
       cooldownAutoReady: "Форма стане активною автоматично",
-      limitOptionsTitle: "Хочете більше казок?",
-      limitFreeOption: "Безкоштовно",
-      limitFreeOptionDesc: "5 казок на день",
-      limitPremiumOption: "Преміум",
-      limitPremiumOptionDesc: "30 казок на день",
-      limitPdfBadge: "Завантаження PDF",
-      limitPremiumCta: "Спробувати Преміум",
+      limitRegisterTitle: "Зареєструйтесь безкоштовно для повного доступу",
+      limitRegisterBenefits: ["30 казок на день", "Завантаження будь-якої казки у PDF", "Налаштування довжини, настрою та приводу"],
+      limitMaybeLater: "Може пізніше",
       limitBackTomorrow: "Повернутись завтра",
       register: "Зареєструватись",
       guestSaveCta: "Зареєструватись — безкоштовно",

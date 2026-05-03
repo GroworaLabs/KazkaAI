@@ -60,8 +60,8 @@ export async function POST(req: NextRequest) {
       }
     } else {
       const userId = session.user.id;
-      const plan = (session.user.plan ?? "FREE") as "FREE" | "PREMIUM";
-      const limits = PLAN_LIMITS[plan];
+      // All logged-in users get PREMIUM limits until payments are enabled
+      const limits = PLAN_LIMITS.PREMIUM;
       const now = new Date();
 
       const user = await prisma.user.findUnique({

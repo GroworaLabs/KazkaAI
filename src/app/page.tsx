@@ -31,7 +31,7 @@ export default function HomePage() {
   const { locale, t } = useLocale();
   const h = t.home;
   const isLoggedIn = !!session;
-  const isPremium = session?.user?.plan === "PREMIUM";
+  const isPremium = isLoggedIn; // until payments: all logged-in users have full access
   const { status, content, error, cooldownSeconds, result, generate, reset } = useStoryGenerator();
   useLocalStories();
   const [currentInput, setCurrentInput] = useState<StoryInput | null>(null);
