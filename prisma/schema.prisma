@@ -21,6 +21,7 @@ model User {
   plan            Plan          @default(FREE)
   storiesUsedToday Int          @default(0)
   dailyResetAt    DateTime      @default(now())
+  lastGeneratedAt DateTime?
   referredBy      String?
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt

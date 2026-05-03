@@ -13,6 +13,7 @@ interface StoryDisplayProps {
   status: GenerationStatus;
   content: string;
   error: string | null;
+  cooldownSeconds?: number | null;
   result: { storyId: string | null; shareToken: string | null } | null;
   childName?: string;
   theme?: string;
@@ -22,7 +23,7 @@ interface StoryDisplayProps {
 }
 
 export function StoryDisplay({
-  status, content, error, result, childName, theme,
+  status, content, error, cooldownSeconds, result, childName, theme,
   isPremium = false, onReset, onRegisterPrompt,
 }: StoryDisplayProps) {
   const [copied, setCopied] = useState(false);
@@ -61,7 +62,24 @@ export function StoryDisplay({
         animate={{ opacity: 1, y: 0 }}
         className="rounded-3xl bg-white border-2 border-border p-8 text-center space-y-4 shadow-xl shadow-primary/8"
       >
-        {(error === "limit_reached" || error === "guest_limit") ? (
+        {error === "cooldown" ? (
+          <>
+            <div className="w-14 h-14 rounded-2xl bg-teal/15 flex items-center justify-center mx-auto">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#06B6D4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+              </svg>
+            </div>
+            <h3 className="font-heading font-900 text-2xl text-foreground">{t.display.cooldownLabel}</h3>
+            <p className="text-muted-foreground text-sm leading-relaxed max-w-sm mx-auto">
+              {cooldownSeconds ? t.display.limitCooldownMsg(cooldownSeconds) : t.display.limitCooldownMsg(10)}
+            </p>
+            <Button onClick={onReset} variant="outline" size="sm"
+              className="rounded-full border-2 border-border font-heading font-800 hover:border-primary/40">
+              {t.display.tryAgain}
+            </Button>
+          </>
+        ) : (error === "limit_reached" || error === "guest_limit") ? (
           <>
             <div className="w-14 h-14 rounded-2xl bg-sun/15 flex items-center justify-center mx-auto">
               <svg width="24" height="24" viewBox="0 0 20 20" fill="#FFBE0B">

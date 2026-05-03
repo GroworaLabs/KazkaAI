@@ -12,6 +12,7 @@ export function useStoryGenerator() {
   const [status, setStatus] = useState<GenerationStatus>("idle");
   const [content, setContent] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [cooldownSeconds, setCooldownSeconds] = useState<number | null>(null);
   const [result, setResult] = useState<GeneratorResult | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
@@ -22,6 +23,7 @@ export function useStoryGenerator() {
     setStatus("loading");
     setContent("");
     setError(null);
+    setCooldownSeconds(null);
     setResult(null);
 
     try {
@@ -36,8 +38,11 @@ export function useStoryGenerator() {
         const data = await res.json().catch(() => ({}));
         const errorCode = data.error ?? "unknown";
 
-        if (errorCode === "limit_reached" || errorCode === "guest_limit") {
+        if (errorCode === "limit_reached" || errorCode === "guest_limit" || errorCode === "cooldown") {
           setError(errorCode);
+          if (errorCode === "cooldown" && data.secondsLeft) {
+            setCooldownSeconds(data.secondsLeft);
+          }
         } else {
           setError(data.message ?? "unknown_error");
         }
@@ -89,8 +94,9 @@ export function useStoryGenerator() {
     setStatus("idle");
     setContent("");
     setError(null);
+    setCooldownSeconds(null);
     setResult(null);
   }, []);
 
-  return { status, content, error, result, generate, reset };
+  return { status, content, error, cooldownSeconds, result, generate, reset };
 }

@@ -52,6 +52,8 @@ export interface Translations {
     limitTitle: string;
     limitGuestMsg: string;
     limitUserMsg: string;
+    limitCooldownMsg: (seconds: number) => string;
+    cooldownLabel: string;
     register: string;
     guestSaveCta: string;
     guestSaveDesc: string;
@@ -121,7 +123,7 @@ export interface Translations {
     storiesCount: (n: number) => string;
     premium: string;
     free: string;
-    storiesUsed: (n: number) => string;
+    storiesUsed: (n: number, max: number) => string;
     upgradeSuccess: string;
     allStories: string;
     upgradeCta: string;
@@ -232,8 +234,10 @@ export const translations: Record<Locale, Translations> = {
       errorGeneric: "Something went wrong",
       tryAgain: "Try Again",
       limitTitle: "That's enough stories for today",
-      limitGuestMsg: "Sign up for free and get 1 story per day. Or upgrade to Premium for unlimited access.",
-      limitUserMsg: "You've used your free story for today. Premium gives unlimited access.",
+      limitGuestMsg: "Sign up for free and get 5 stories per day. Or upgrade to Premium for 30 per day.",
+      limitUserMsg: "You've reached your daily story limit. Come back tomorrow or upgrade to Premium for 30 stories per day.",
+      limitCooldownMsg: (s) => `Please wait ${s} second${s === 1 ? "" : "s"} before creating another story.`,
+      cooldownLabel: "Wait a moment",
       register: "Sign Up",
       guestSaveCta: "Sign up — it's free",
       guestSaveDesc: "Create a free account to save this story and generate more.",
@@ -271,7 +275,7 @@ export const translations: Record<Locale, Translations> = {
       ctaSub: "First story — free. No credit card required.",
       ctaButton: "Create Story",
       registerTitle: "Sign up for free",
-      registerSub: "Get 1 story per day at no cost",
+      registerSub: "Get 5 stories per day at no cost",
       registerGoogle: "Continue with Google",
       registerEmail: "Continue with email",
       registerClose: "Close",
@@ -279,12 +283,12 @@ export const translations: Record<Locale, Translations> = {
         {
           name: "Free", price: "$0", period: "", description: "Perfect to get started",
           plan: "FREE", highlighted: false, cta: "Start for free",
-          features: ["1 story per day", "All themes & characters", "Copy & share", "Save 10 stories"],
+          features: ["5 stories per day", "All themes & characters", "Copy & share", "Save 10 stories"],
         },
         {
           name: "Premium", price: "$3.99", period: "month", description: "Unlimited stories for the family",
           plan: "PREMIUM", highlighted: true, cta: "Try Premium",
-          features: ["Unlimited stories", "PDF download", "Priority generation", "Save all stories", "24/7 support"],
+          features: ["Up to 30 stories per day", "PDF download", "Priority generation", "Save all stories", "24/7 support"],
         },
       ],
     },
@@ -295,7 +299,7 @@ export const translations: Record<Locale, Translations> = {
       mostPopular: "Most Popular",
       compareHeaders: { feature: "Feature", free: "Free", premium: "Premium" },
       compareRows: [
-        { feature: "Stories per day", free: "1", premium: "Unlimited" },
+        { feature: "Stories per day", free: "5", premium: "30" },
         { feature: "Saved stories", free: "10", premium: "Unlimited" },
         { feature: "PDF download", free: "—", premium: "✓" },
         { feature: "Priority queue", free: "—", premium: "✓" },
@@ -307,13 +311,13 @@ export const translations: Record<Locale, Translations> = {
         {
           name: "Free", price: "$0", period: "", description: "Try KazkaAI for free",
           plan: "FREE", highlighted: false, cta: "Start for free",
-          features: ["1 story per day", "All 12 themes & characters", "Copy & share", "Save 10 stories", "Unique story link"],
+          features: ["5 stories per day", "All 12 themes & characters", "Copy & share", "Save 10 stories", "Unique story link"],
         },
         {
           name: "Premium", price: "$3.99", period: "month", description: "Unlimited stories for your family",
           plan: "PREMIUM", highlighted: true, cta: "Try Premium",
           features: [
-            "Unlimited stories",
+            "Up to 30 stories per day",
             "Beautiful PDF download",
             "Priority generation (faster)",
             "Save all stories forever",
@@ -330,7 +334,7 @@ export const translations: Record<Locale, Translations> = {
       storiesCount: (n) => `${n} ${n === 1 ? "story" : "stories"} saved`,
       premium: "Premium",
       free: "Free",
-      storiesUsed: (n) => `${n}/1 stories today`,
+      storiesUsed: (n, max) => `${n}/${max} stories today`,
       upgradeSuccess: "Congratulations! You've successfully upgraded to Premium. You can now create unlimited stories!",
       allStories: "All Stories",
       upgradeCta: "Premium",
@@ -441,8 +445,10 @@ export const translations: Record<Locale, Translations> = {
       errorGeneric: "Щось пішло не так",
       tryAgain: "Спробувати знову",
       limitTitle: "На сьогодні вже досить казок",
-      limitGuestMsg: "Зареєструйтесь безкоштовно і отримайте 1 казку щодня. Або перейдіть на Преміум для необмеженого доступу.",
-      limitUserMsg: "Ви вже використали свою безкоштовну казку на сьогодні. Преміум дає необмежений доступ.",
+      limitGuestMsg: "Зареєструйтесь безкоштовно і отримайте 5 казок на день. Або перейдіть на Преміум — 30 казок на день.",
+      limitUserMsg: "Ви досягли ліміту казок на сьогодні. Поверніться завтра або перейдіть на Преміум — 30 казок на день.",
+      limitCooldownMsg: (s) => `Зачекайте ${s} ${s === 1 ? "секунду" : s <= 4 ? "секунди" : "секунд"} перед наступною казкою.`,
+      cooldownLabel: "Почекайте",
       register: "Зареєструватись",
       guestSaveCta: "Зареєструватись — безкоштовно",
       guestSaveDesc: "Створіть акаунт, щоб зберегти цю казку та генерувати більше.",
@@ -480,7 +486,7 @@ export const translations: Record<Locale, Translations> = {
       ctaSub: "Перша казка — безкоштовно. Без кредитної картки.",
       ctaButton: "Створити казку",
       registerTitle: "Зареєструйтесь безкоштовно",
-      registerSub: "Отримайте 1 казку щодня безкоштовно",
+      registerSub: "Отримайте 5 казок на день безкоштовно",
       registerGoogle: "Увійти через Google",
       registerEmail: "Увійти через email",
       registerClose: "Закрити",
@@ -488,12 +494,12 @@ export const translations: Record<Locale, Translations> = {
         {
           name: "Безкоштовно", price: "$0", period: "", description: "Ідеально для знайомства",
           plan: "FREE", highlighted: false, cta: "Почати безкоштовно",
-          features: ["1 казка на день", "Всі теми та персонажі", "Копіювання та поширення", "Збереження 10 казок"],
+          features: ["5 казок на день", "Всі теми та персонажі", "Копіювання та поширення", "Збереження 10 казок"],
         },
         {
           name: "Преміум", price: "$3.99", period: "місяць", description: "Необмежені казки для сім'ї",
           plan: "PREMIUM", highlighted: true, cta: "Спробувати Преміум",
-          features: ["Необмежена кількість казок", "Завантаження PDF", "Пріоритетна генерація", "Збереження всіх казок", "Підтримка 24/7"],
+          features: ["До 30 казок на день", "Завантаження PDF", "Пріоритетна генерація", "Збереження всіх казок", "Підтримка 24/7"],
         },
       ],
     },
@@ -504,7 +510,7 @@ export const translations: Record<Locale, Translations> = {
       mostPopular: "Найпопулярніший",
       compareHeaders: { feature: "Функція", free: "Безкоштовно", premium: "Преміум" },
       compareRows: [
-        { feature: "Казки на день", free: "1", premium: "Необмежено" },
+        { feature: "Казки на день", free: "5", premium: "30" },
         { feature: "Збережених казок", free: "10", premium: "Необмежено" },
         { feature: "Завантаження PDF", free: "—", premium: "✓" },
         { feature: "Пріоритетна черга", free: "—", premium: "✓" },
@@ -516,13 +522,13 @@ export const translations: Record<Locale, Translations> = {
         {
           name: "Безкоштовно", price: "$0", period: "", description: "Для знайомства з КазкоAI",
           plan: "FREE", highlighted: false, cta: "Почати безкоштовно",
-          features: ["1 казка на день", "Всі 12 тем і персонажів", "Копіювання та поширення", "Збереження 10 казок", "Унікальне посилання для казки"],
+          features: ["5 казок на день", "Всі 12 тем і персонажів", "Копіювання та поширення", "Збереження 10 казок", "Унікальне посилання для казки"],
         },
         {
           name: "Преміум", price: "$3.99", period: "місяць", description: "Необмежені казки для вашої родини",
           plan: "PREMIUM", highlighted: true, cta: "Спробувати Преміум",
           features: [
-            "Необмежена кількість казок",
+            "До 30 казок на день",
             "Завантаження PDF з красивим оформленням",
             "Пріоритетна генерація (швидше)",
             "Збереження всіх казок навічно",
@@ -539,7 +545,7 @@ export const translations: Record<Locale, Translations> = {
       storiesCount: (n) => `${n} казк${n === 1 ? "а" : n <= 4 ? "и" : ""} збережено`,
       premium: "Преміум",
       free: "Безкоштовно",
-      storiesUsed: (n) => `${n}/1 казок сьогодні`,
+      storiesUsed: (n, max) => `${n}/${max} казок сьогодні`,
       upgradeSuccess: "Вітаємо! Ви успішно перейшли на Преміум. Тепер ви можете створювати необмежену кількість казок!",
       allStories: "Всі казки",
       upgradeCta: "Преміум",

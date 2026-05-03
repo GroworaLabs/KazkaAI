@@ -3,6 +3,7 @@ import { z } from "zod";
 import { generateStoryStream } from "@/lib/gemini";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
+import { PLAN_LIMITS } from "@/lib/limits";
 
 const schema = z.object({
   childName: z.string().min(1).max(50),
@@ -16,19 +17,30 @@ const schema = z.object({
   friendName: z.string().max(30).optional(),
 });
 
-// Simple in-memory rate limiter for guests (IP → timestamp)
-const guestUsage = new Map<string, { count: number; resetAt: number }>();
+// In-memory rate limiter for guests — resets on server restart, acceptable for guests
+const guestUsage = new Map<string, { count: number; resetAt: number; lastAt: number }>();
 
-function isGuestRateLimited(ip: string): boolean {
+function checkGuestLimit(ip: string): { blocked: boolean; reason?: "guest_limit" | "cooldown"; secondsLeft?: number } {
   const now = Date.now();
+  const { daily, cooldownMs } = PLAN_LIMITS.GUEST;
   const entry = guestUsage.get(ip);
+
   if (!entry || now > entry.resetAt) {
-    guestUsage.set(ip, { count: 1, resetAt: now + 86_400_000 });
-    return false;
+    guestUsage.set(ip, { count: 1, resetAt: now + 86_400_000, lastAt: now });
+    return { blocked: false };
   }
-  if (entry.count >= 1) return true;
+
+  if (now - entry.lastAt < cooldownMs) {
+    return { blocked: true, reason: "cooldown", secondsLeft: Math.ceil((cooldownMs - (now - entry.lastAt)) / 1000) };
+  }
+
+  if (entry.count >= daily) {
+    return { blocked: true, reason: "guest_limit" };
+  }
+
   entry.count++;
-  return false;
+  entry.lastAt = now;
+  return { blocked: false };
 }
 
 export async function POST(req: NextRequest) {
@@ -46,21 +58,63 @@ export async function POST(req: NextRequest) {
     const input = parsed.data;
     const session = await auth();
 
-    // Rate limiting — logged-in users have no limit; guests get 1/day by IP
     if (!session?.user?.id) {
-      const ip =
-        req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-        "unknown";
-      if (isGuestRateLimited(ip)) {
+      const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+      const check = checkGuestLimit(ip);
+      if (check.blocked) {
         return new Response(
-          JSON.stringify({
-            error: "guest_limit",
-            message:
-              "Ви вже створили безкоштовну казку сьогодні. Зареєструйтесь, щоб отримати більше.",
-          }),
+          JSON.stringify({ error: check.reason, secondsLeft: check.secondsLeft }),
           { status: 429, headers: { "Content-Type": "application/json" } }
         );
       }
+    } else {
+      const userId = session.user.id;
+      const plan = (session.user.plan ?? "FREE") as "FREE" | "PREMIUM";
+      const limits = PLAN_LIMITS[plan];
+      const now = new Date();
+
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { storiesUsedToday: true, dailyResetAt: true, lastGeneratedAt: true },
+      });
+
+      if (!user) {
+        return new Response(JSON.stringify({ error: "User not found" }), { status: 401 });
+      }
+
+      // Cooldown check
+      if (user.lastGeneratedAt) {
+        const msSinceLast = now.getTime() - user.lastGeneratedAt.getTime();
+        if (msSinceLast < limits.cooldownMs) {
+          const secondsLeft = Math.ceil((limits.cooldownMs - msSinceLast) / 1000);
+          return new Response(
+            JSON.stringify({ error: "cooldown", secondsLeft }),
+            { status: 429, headers: { "Content-Type": "application/json" } }
+          );
+        }
+      }
+
+      // Reset daily counter if 24h window has passed
+      const isNewDay = now.getTime() > user.dailyResetAt.getTime() + 86_400_000;
+      const storiesUsedToday = isNewDay ? 0 : user.storiesUsedToday;
+
+      // Daily limit check
+      if (storiesUsedToday >= limits.daily) {
+        return new Response(
+          JSON.stringify({ error: "limit_reached" }),
+          { status: 429, headers: { "Content-Type": "application/json" } }
+        );
+      }
+
+      // Update counters before generating
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          storiesUsedToday: isNewDay ? 1 : { increment: 1 },
+          ...(isNewDay && { dailyResetAt: now }),
+          lastGeneratedAt: now,
+        },
+      });
     }
 
     // Stream from Gemini

@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { StoryCard } from "@/components/StoryCard";
 import { Button } from "@/components/ui/button";
 import { Plan } from "@/types";
+import { PLAN_LIMITS } from "@/lib/limits";
 import { Plus, Star, BookOpen } from "lucide-react";
 import { useLocale } from "@/contexts/LocaleContext";
 
@@ -71,11 +72,9 @@ export function DashboardClient({ stories, total, page, limit, user, upgraded }:
                   <><BookOpen size={11} /> {d.free}</>
                 )}
               </div>
-              {!isPremium && (
-                <p className="text-xs text-white/40 font-heading font-700">
-                  {d.storiesUsed(user?.storiesUsedToday ?? 0)}
-                </p>
-              )}
+              <p className="text-xs text-white/40 font-heading font-700">
+                {d.storiesUsed(user?.storiesUsedToday ?? 0, PLAN_LIMITS[user?.plan ?? "FREE"].daily)}
+              </p>
             </div>
           </div>
         </div>
