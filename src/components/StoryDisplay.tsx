@@ -1,11 +1,12 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { GenerationStatus } from "@/types";
 import { buildShareText, getShareUrl } from "@/lib/utils";
-import { Copy, Download, Share2, RefreshCw, CheckCheck, Loader2, ArrowRight } from "lucide-react";
+import { Copy, Download, Share2, RefreshCw, CheckCheck, Loader2, ArrowRight, BookOpen, Star, FileDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLocale } from "@/contexts/LocaleContext";
 
@@ -17,6 +18,7 @@ interface StoryDisplayProps {
   result: { storyId: string | null; shareToken: string | null } | null;
   childName?: string;
   theme?: string;
+  isLoggedIn?: boolean;
   isPremium?: boolean;
   onReset: () => void;
   onRegisterPrompt?: () => void;
@@ -24,10 +26,32 @@ interface StoryDisplayProps {
 
 export function StoryDisplay({
   status, content, error, cooldownSeconds, result, childName, theme,
-  isPremium = false, onReset, onRegisterPrompt,
+  isLoggedIn = false, isPremium = false, onReset, onRegisterPrompt,
 }: StoryDisplayProps) {
   const [copied, setCopied] = useState(false);
+  const [countdown, setCountdown] = useState(0);
   const { locale, t } = useLocale();
+  const d = t.display;
+
+  const onResetRef = useRef(onReset);
+  useEffect(() => { onResetRef.current = onReset; }, [onReset]);
+
+  useEffect(() => {
+    if (error !== "cooldown") return;
+    const secs = cooldownSeconds ?? 10;
+    setCountdown(secs);
+    const id = setInterval(() => {
+      setCountdown(prev => {
+        if (prev <= 1) {
+          clearInterval(id);
+          setTimeout(() => onResetRef.current(), 400);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(id);
+  }, [error, cooldownSeconds]);
 
   const handleCopy = useCallback(() => {
     if (!content) return;
@@ -60,57 +84,125 @@ export function StoryDisplay({
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        className="rounded-3xl bg-white border-2 border-border p-8 text-center space-y-4 shadow-xl shadow-primary/8"
+        className="rounded-3xl bg-white border-2 border-border shadow-xl shadow-primary/8 overflow-hidden"
       >
         {error === "cooldown" ? (
-          <>
-            <div className="w-14 h-14 rounded-2xl bg-teal/15 flex items-center justify-center mx-auto">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#06B6D4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10"/>
-                <polyline points="12 6 12 12 16 14"/>
+          <div className="p-8 text-center space-y-4">
+            {/* Countdown ring */}
+            <div className="relative w-20 h-20 mx-auto">
+              <svg className="w-20 h-20 -rotate-90" viewBox="0 0 80 80">
+                <circle cx="40" cy="40" r="34" fill="none" stroke="#e5e7eb" strokeWidth="6" />
+                <circle cx="40" cy="40" r="34" fill="none" stroke="#06B6D4" strokeWidth="6"
+                  strokeLinecap="round"
+                  strokeDasharray={`${2 * Math.PI * 34}`}
+                  strokeDashoffset={`${2 * Math.PI * 34 * (1 - countdown / (cooldownSeconds ?? 10))}`}
+                  style={{ transition: "stroke-dashoffset 0.9s linear" }}
+                />
               </svg>
+              <span className="absolute inset-0 flex items-center justify-center font-heading font-900 text-2xl text-teal-600">
+                {countdown}
+              </span>
             </div>
-            <h3 className="font-heading font-900 text-2xl text-foreground">{t.display.cooldownLabel}</h3>
-            <p className="text-muted-foreground text-sm leading-relaxed max-w-sm mx-auto">
-              {cooldownSeconds ? t.display.limitCooldownMsg(cooldownSeconds) : t.display.limitCooldownMsg(10)}
-            </p>
-            <Button onClick={onReset} variant="outline" size="sm"
-              className="rounded-full border-2 border-border font-heading font-800 hover:border-primary/40">
-              {t.display.tryAgain}
-            </Button>
-          </>
-        ) : (error === "limit_reached" || error === "guest_limit") ? (
-          <>
-            <div className="w-14 h-14 rounded-2xl bg-sun/15 flex items-center justify-center mx-auto">
-              <svg width="24" height="24" viewBox="0 0 20 20" fill="#FFBE0B">
-                <path d="M10 2 L12 8 L18 8 L13.5 11.5 L15.5 17.5 L10 14 L4.5 17.5 L6.5 11.5 L2 8 L8 8 Z"/>
-              </svg>
+            <h3 className="font-heading font-900 text-xl text-foreground">{d.cooldownLabel}</h3>
+            <p className="text-muted-foreground text-sm">{d.cooldownAutoReady}</p>
+          </div>
+        ) : error === "guest_limit" ? (
+          <div className="p-6 sm:p-8">
+            <div className="text-center mb-6">
+              <h3 className="font-heading font-900 text-2xl text-foreground">{d.limitTitle}</h3>
+              <p className="text-muted-foreground text-sm mt-1">{d.limitOptionsTitle}</p>
             </div>
-            <h3 className="font-heading font-900 text-2xl text-foreground">{t.display.limitTitle}</h3>
-            <p className="text-muted-foreground text-sm leading-relaxed max-w-sm mx-auto">
-              {error === "guest_limit" ? t.display.limitGuestMsg : t.display.limitUserMsg}
-            </p>
-            <div className="flex gap-3 justify-center pt-2">
-              <Button onClick={onRegisterPrompt} size="sm"
-                className="bg-primary hover:bg-primary-dark text-white rounded-full font-heading font-800 gap-1.5">
-                {t.display.register} <ArrowRight size={13} />
-              </Button>
-              <Button variant="outline" size="sm"
-                className="rounded-full border-2 border-border font-heading font-800 hover:border-primary/40"
-                onClick={onReset}>
-                {t.display.tryAgain}
-              </Button>
+            <div className="grid grid-cols-2 gap-3">
+              {/* Free option */}
+              <div className="rounded-2xl border-2 border-border p-4 flex flex-col gap-2">
+                <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <BookOpen size={15} className="text-primary" />
+                </div>
+                <p className="font-heading font-800 text-sm">{d.limitFreeOption}</p>
+                <p className="text-xs text-muted-foreground">{d.limitFreeOptionDesc}</p>
+                <Button onClick={onRegisterPrompt} size="sm"
+                  className="mt-auto bg-primary hover:bg-primary-dark text-white rounded-full font-heading font-800 gap-1 text-xs h-8">
+                  {d.register} <ArrowRight size={11} />
+                </Button>
+              </div>
+              {/* Premium option */}
+              <div className="rounded-2xl border-2 border-sun/50 bg-sun/5 p-4 flex flex-col gap-2">
+                <div className="w-8 h-8 rounded-xl bg-sun/20 flex items-center justify-center">
+                  <Star size={15} className="text-[#9B6700]" fill="currentColor" />
+                </div>
+                <p className="font-heading font-800 text-sm">{d.limitPremiumOption}</p>
+                <p className="text-xs text-muted-foreground">{d.limitPremiumOptionDesc}</p>
+                <div className="inline-flex items-center gap-1 text-xs font-heading font-700 text-[#9B6700]">
+                  <FileDown size={11} /> {d.limitPdfBadge}
+                </div>
+                <Link href="/pricing" className="mt-auto">
+                  <Button size="sm"
+                    className="w-full bg-sun hover:bg-sun/80 text-[#1E1044] rounded-full font-heading font-800 gap-1 text-xs h-8">
+                    {d.limitPremiumCta} <ArrowRight size={11} />
+                  </Button>
+                </Link>
+              </div>
             </div>
-          </>
+          </div>
+        ) : error === "limit_reached" ? (
+          <div className="p-6 sm:p-8">
+            <div className="text-center mb-5">
+              <h3 className="font-heading font-900 text-2xl text-foreground">{d.limitTitle}</h3>
+            </div>
+            {isPremium ? (
+              /* PREMIUM hit 30/day — simple message */
+              <div className="text-center space-y-4">
+                <p className="text-muted-foreground text-sm">{d.limitUserMsg}</p>
+                <Button onClick={onReset} variant="outline" size="sm"
+                  className="rounded-full border-2 font-heading font-800">
+                  {d.limitBackTomorrow}
+                </Button>
+              </div>
+            ) : (
+              /* FREE user — show upgrade card */
+              <div className="rounded-2xl border-2 border-sun/50 bg-sun/5 p-5 space-y-3">
+                <div className="flex items-center gap-2">
+                  <Star size={16} className="text-[#9B6700]" fill="currentColor" />
+                  <p className="font-heading font-800 text-base">{d.limitPremiumOption} — $3.99/{locale === "uk" ? "місяць" : "month"}</p>
+                </div>
+                <ul className="space-y-1.5">
+                  {[d.limitPremiumOptionDesc, d.limitPdfBadge].map((feat) => (
+                    <li key={feat} className="flex items-center gap-2 text-sm text-foreground/70">
+                      <span className="w-4 h-4 rounded-full bg-sun/30 flex items-center justify-center shrink-0">
+                        <svg width="8" height="6" viewBox="0 0 8 6" fill="none">
+                          <path d="M1 3l2 2 4-4" stroke="#9B6700" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </span>
+                      {feat === d.limitPdfBadge
+                        ? <span className="flex items-center gap-1"><FileDown size={12} className="text-[#9B6700]" />{feat}</span>
+                        : feat}
+                    </li>
+                  ))}
+                </ul>
+                <div className="flex gap-2 pt-1">
+                  <Link href="/pricing" className="flex-1">
+                    <Button size="sm"
+                      className="w-full bg-sun hover:bg-sun/80 text-[#1E1044] rounded-full font-heading font-800 gap-1.5">
+                      {d.limitPremiumCta} <ArrowRight size={13} />
+                    </Button>
+                  </Link>
+                  <Button variant="outline" size="sm" onClick={onReset}
+                    className="rounded-full border-2 font-heading font-800 text-muted-foreground">
+                    {d.limitBackTomorrow}
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
         ) : (
-          <>
-            <h3 className="font-heading font-900 text-2xl">{t.display.errorGeneric}</h3>
+          <div className="p-8 text-center space-y-4">
+            <h3 className="font-heading font-900 text-2xl">{d.errorGeneric}</h3>
             <p className="text-muted-foreground text-sm">{error === "unknown_error" ? "" : error}</p>
             <Button onClick={onReset} variant="outline" size="sm"
               className="gap-2 rounded-full border-2 font-heading font-800">
-              <RefreshCw size={13} /> {t.display.tryAgain}
+              <RefreshCw size={13} /> {d.tryAgain}
             </Button>
-          </>
+          </div>
         )}
       </motion.div>
     );
@@ -118,7 +210,7 @@ export function StoryDisplay({
 
   if (status === "idle") return null;
 
-  const storyTitle = childName ? t.display.storyFor(childName) : t.display.yourStory;
+  const storyTitle = childName ? d.storyFor(childName) : d.yourStory;
 
   return (
     <AnimatePresence mode="wait">
@@ -140,10 +232,10 @@ export function StoryDisplay({
           {status === "streaming" ? (
             <div className="flex items-center gap-1.5 text-xs text-white/70 font-heading font-700">
               <Loader2 size={10} className="animate-spin" />
-              {t.display.writing}
+              {d.writing}
             </div>
           ) : (
-            <span className="font-heading font-700 text-white/40 text-xs">{t.display.done}</span>
+            <span className="font-heading font-700 text-white/40 text-xs">{d.done}</span>
           )}
         </div>
 
@@ -152,7 +244,7 @@ export function StoryDisplay({
           <h2 className="font-heading font-900 text-xl text-foreground">{storyTitle}</h2>
           {theme && (
             <p className="text-xs text-muted-foreground font-heading font-700 uppercase tracking-widest mt-0.5">
-              {t.display.theme}: {theme}
+              {d.theme}: {theme}
             </p>
           )}
         </div>
@@ -184,28 +276,37 @@ export function StoryDisplay({
               <Button variant="outline" size="sm" onClick={handleCopy}
                 className="gap-1.5 text-xs rounded-full border-2 border-border font-heading font-800 hover:border-primary/40 hover:bg-primary/5 hover:text-primary">
                 {copied ? <CheckCheck size={12} /> : <Copy size={12} />}
-                {copied ? t.display.copied : t.display.copy}
+                {copied ? d.copied : d.copy}
               </Button>
 
               <Button variant="outline" size="sm" onClick={handleShare}
                 className="gap-1.5 text-xs rounded-full border-2 border-border font-heading font-800 hover:border-primary/40 hover:bg-primary/5 hover:text-primary">
-                <Share2 size={12} /> {t.display.share}
+                <Share2 size={12} /> {d.share}
               </Button>
 
               {result?.shareToken && isPremium && (
                 <Button variant="outline" size="sm" onClick={handleDownloadPdf}
                   className="gap-1.5 text-xs rounded-full border-2 border-sun/40 text-[#9B6700] font-heading font-800 hover:bg-sun/10 hover:border-sun">
-                  <Download size={12} /> {t.display.downloadPdf}
+                  <Download size={12} /> {d.downloadPdf}
                 </Button>
+              )}
+
+              {result?.shareToken && !isPremium && isLoggedIn && (
+                <Link href="/pricing">
+                  <Button variant="outline" size="sm"
+                    className="gap-1.5 text-xs rounded-full border-2 border-sun/40 text-[#9B6700] font-heading font-800 hover:bg-sun/10 hover:border-sun">
+                    <FileDown size={12} /> {d.pdfPremium}
+                  </Button>
+                </Link>
               )}
 
               <Button variant="ghost" size="sm" onClick={onReset}
                 className="gap-1.5 text-xs ml-auto rounded-full font-heading font-800 text-muted-foreground hover:text-foreground hover:bg-primary/5">
-                <RefreshCw size={12} /> {t.display.newStory}
+                <RefreshCw size={12} /> {d.newStory}
               </Button>
             </motion.div>
 
-            {!isPremium && (
+            {!isLoggedIn && (
               <motion.div
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -213,11 +314,11 @@ export function StoryDisplay({
                 className="mx-6 mb-6 rounded-2xl bg-primary/6 border border-primary/15 p-4 flex items-center justify-between gap-4"
               >
                 <p className="text-sm font-heading font-700 text-foreground/75 leading-snug">
-                  {t.display.guestSaveDesc}
+                  {d.guestSaveDesc}
                 </p>
                 <Button size="sm" onClick={onRegisterPrompt}
                   className="shrink-0 bg-primary hover:bg-primary-dark text-white rounded-full font-heading font-800 gap-1.5 px-4">
-                  {t.display.guestSaveCta} <ArrowRight size={12} />
+                  {d.guestSaveCta} <ArrowRight size={12} />
                 </Button>
               </motion.div>
             )}

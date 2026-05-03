@@ -17,30 +17,22 @@ const schema = z.object({
   friendName: z.string().max(30).optional(),
 });
 
-// In-memory rate limiter for guests — resets on server restart, acceptable for guests
-const guestUsage = new Map<string, { count: number; resetAt: number; lastAt: number }>();
+// In-memory rate limiter for guests — 1 story per day per IP, no cooldown
+const guestUsage = new Map<string, { count: number; resetAt: number }>();
 
-function checkGuestLimit(ip: string): { blocked: boolean; reason?: "guest_limit" | "cooldown"; secondsLeft?: number } {
+function checkGuestLimit(ip: string): boolean {
   const now = Date.now();
-  const { daily, cooldownMs } = PLAN_LIMITS.GUEST;
   const entry = guestUsage.get(ip);
 
   if (!entry || now > entry.resetAt) {
-    guestUsage.set(ip, { count: 1, resetAt: now + 86_400_000, lastAt: now });
-    return { blocked: false };
+    guestUsage.set(ip, { count: 1, resetAt: now + 86_400_000 });
+    return false;
   }
 
-  if (now - entry.lastAt < cooldownMs) {
-    return { blocked: true, reason: "cooldown", secondsLeft: Math.ceil((cooldownMs - (now - entry.lastAt)) / 1000) };
-  }
-
-  if (entry.count >= daily) {
-    return { blocked: true, reason: "guest_limit" };
-  }
+  if (entry.count >= PLAN_LIMITS.GUEST.daily) return true;
 
   entry.count++;
-  entry.lastAt = now;
-  return { blocked: false };
+  return false;
 }
 
 export async function POST(req: NextRequest) {
@@ -60,10 +52,9 @@ export async function POST(req: NextRequest) {
 
     if (!session?.user?.id) {
       const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
-      const check = checkGuestLimit(ip);
-      if (check.blocked) {
+      if (checkGuestLimit(ip)) {
         return new Response(
-          JSON.stringify({ error: check.reason, secondsLeft: check.secondsLeft }),
+          JSON.stringify({ error: "guest_limit" }),
           { status: 429, headers: { "Content-Type": "application/json" } }
         );
       }

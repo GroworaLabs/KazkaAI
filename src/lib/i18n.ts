@@ -54,6 +54,15 @@ export interface Translations {
     limitUserMsg: string;
     limitCooldownMsg: (seconds: number) => string;
     cooldownLabel: string;
+    cooldownAutoReady: string;
+    limitOptionsTitle: string;
+    limitFreeOption: string;
+    limitFreeOptionDesc: string;
+    limitPremiumOption: string;
+    limitPremiumOptionDesc: string;
+    limitPdfBadge: string;
+    limitPremiumCta: string;
+    limitBackTomorrow: string;
     register: string;
     guestSaveCta: string;
     guestSaveDesc: string;
@@ -238,6 +247,15 @@ export const translations: Record<Locale, Translations> = {
       limitUserMsg: "You've reached your daily story limit. Come back tomorrow or upgrade to Premium for 30 stories per day.",
       limitCooldownMsg: (s) => `Please wait ${s} second${s === 1 ? "" : "s"} before creating another story.`,
       cooldownLabel: "Wait a moment",
+      cooldownAutoReady: "The form will be ready automatically",
+      limitOptionsTitle: "Want more stories?",
+      limitFreeOption: "Free account",
+      limitFreeOptionDesc: "5 stories per day",
+      limitPremiumOption: "Premium",
+      limitPremiumOptionDesc: "30 stories per day",
+      limitPdfBadge: "PDF download",
+      limitPremiumCta: "Try Premium",
+      limitBackTomorrow: "Come back tomorrow",
       register: "Sign Up",
       guestSaveCta: "Sign up — it's free",
       guestSaveDesc: "Create a free account to save this story and generate more.",
@@ -449,6 +467,15 @@ export const translations: Record<Locale, Translations> = {
       limitUserMsg: "Ви досягли ліміту казок на сьогодні. Поверніться завтра або перейдіть на Преміум — 30 казок на день.",
       limitCooldownMsg: (s) => `Зачекайте ${s} ${s === 1 ? "секунду" : s <= 4 ? "секунди" : "секунд"} перед наступною казкою.`,
       cooldownLabel: "Почекайте",
+      cooldownAutoReady: "Форма стане активною автоматично",
+      limitOptionsTitle: "Хочете більше казок?",
+      limitFreeOption: "Безкоштовно",
+      limitFreeOptionDesc: "5 казок на день",
+      limitPremiumOption: "Преміум",
+      limitPremiumOptionDesc: "30 казок на день",
+      limitPdfBadge: "Завантаження PDF",
+      limitPremiumCta: "Спробувати Преміум",
+      limitBackTomorrow: "Повернутись завтра",
       register: "Зареєструватись",
       guestSaveCta: "Зареєструватись — безкоштовно",
       guestSaveDesc: "Створіть акаунт, щоб зберегти цю казку та генерувати більше.",

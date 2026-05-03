@@ -30,7 +30,8 @@ export default function HomePage() {
   const { data: session } = useSession();
   const { locale, t } = useLocale();
   const h = t.home;
-  const isPremium = !!session;
+  const isLoggedIn = !!session;
+  const isPremium = session?.user?.plan === "PREMIUM";
   const { status, content, error, cooldownSeconds, result, generate, reset } = useStoryGenerator();
   useLocalStories();
   const [currentInput, setCurrentInput] = useState<StoryInput | null>(null);
@@ -106,7 +107,8 @@ export default function HomePage() {
             <StoryDisplay
               status={status} content={content} error={error} cooldownSeconds={cooldownSeconds} result={result}
               childName={currentInput?.childName} theme={currentInput?.theme}
-              isPremium={isPremium} onReset={handleReset} onRegisterPrompt={() => setShowModal(true)}
+              isLoggedIn={isLoggedIn} isPremium={isPremium}
+              onReset={handleReset} onRegisterPrompt={() => setShowModal(true)}
             />
           </div>
         </div>
