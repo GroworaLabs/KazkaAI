@@ -559,8 +559,8 @@ export const translations: Record<Locale, Translations> = {
       noStories: "Поки казок немає — створіть першу!",
       storiesCount: (n) => {
         const m10 = n % 10, m100 = n % 100;
-        const s = m10 === 1 && m100 !== 11 ? "а" : m10 >= 2 && m10 <= 4 && (m100 < 10 || m100 >= 20) ? "и" : "ок";
-        return `${n} казк${s} збережено`;
+        const word = m10 === 1 && m100 !== 11 ? "казка" : m10 >= 2 && m10 <= 4 && (m100 < 10 || m100 >= 20) ? "казки" : "казок";
+        return `${n} ${word} збережено`;
       },
       premium: "Преміум",
       free: "Безкоштовно",
